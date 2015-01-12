@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
 <module>
 	<name>payeer</name>
-	<displayName><![CDATA[Payment Payeer]]></displayName>
+	<displayName><![CDATA[Payeer]]></displayName>
 	<version><![CDATA[0.1]]></version>
-	<description><![CDATA[Payment via Payeer]]></description>
+	<description><![CDATA[Оплата через Payeer]]></description>
 	<author><![CDATA[]]></author>
 	<tab><![CDATA[payments_gateways]]></tab>
 	<is_configurable>1</is_configurable>
