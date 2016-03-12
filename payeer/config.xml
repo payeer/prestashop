@@ -3,7 +3,7 @@
 	<name>payeer</name>
 	<displayName>Payeer</displayName>
 	<version>0.1</version>
-	<description>Оплата через сервис Payeer</description>
+	<description>Оплата Payeer</description>
 	<author></author>
 	<tab>payments_gateways</tab>
 	<is_configurable>1</is_configurable>
