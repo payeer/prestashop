@@ -3,8 +3,8 @@
 	<name>payeer</name>
 	<displayName><![CDATA[Payeer]]></displayName>
 	<version><![CDATA[0.1]]></version>
-	<description><![CDATA[Payment Payeer]]></description>
-	<author><![CDATA[]]></author>
+	<description><![CDATA[Payeer allows you to accept payments in all possible ways all over the world!]]></description>
+	<author><![CDATA[Payeer]]></author>
 	<tab><![CDATA[payments_gateways]]></tab>
 	<is_configurable>1</is_configurable>
 	<need_instance>1</need_instance>

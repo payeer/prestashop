@@ -10,7 +10,7 @@ $m_shop = Configuration::get('merchant_id');
 $m_orderid = $cart->id;
 $m_amount = number_format($cart->getOrderTotal(true, 3), 2, '.', '');
 $m_curr = $context->currency->iso_code;
-$m_desc = base64_encode('Оплата заказа №' . $m_orderid);
+$m_desc = base64_encode($payeer->l('Payment of order', 'validation') . ' ' . $m_orderid);
 $m_key = Configuration::get('secret_key');
 
 $arHash = array(
@@ -34,15 +34,15 @@ $sign = strtoupper(hash('sha256', implode(":", $arHash)));
 	<input type="hidden" name="m_desc" value="<?php echo $m_desc; ?>" />
 	<input type="hidden" name="m_sign" value="<?php echo $sign; ?>" />
 	<p>
-		<img src="payeer.png" alt="Оплата через Payeer" style="float:left; margin: 0px 10px 5px 0px;" />
-		Вы выбрали оплату в системе Payeer
+		<img src="payeer.png" alt="<?php echo $payeer->l('Payment via Payeer', 'validation'); ?>" style="float:left; margin: 0px 10px 5px 0px;" />
+		<?php echo $payeer->l('You have chosen a payment system Payeer', 'validation'); ?>
 		<br/><br/>
 	</p><br/><br/>
 	<p>
-		<b>Пожалуйста, подтвердите заказ, нажав кнопку 'Подтверждаю заказ'</b>
+		<b><?php echo $payeer->l('Please confirm the order by clicking "Confirm order"', 'validation'); ?></b>
 	</p>
 	<p class="cart_navigation">
-		<input type="submit" name="m_process" value="Подтверждаю заказ" class="exclusive_large" />
+		<input type="submit" name="m_process" value="<?php echo $payeer->l('Confirm order', 'validation'); ?>" class="exclusive_large" />
 	</p>
 </form>
 

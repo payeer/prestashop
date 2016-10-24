@@ -1,9 +1,7 @@
 <?php
 
-if (!defined('_CAN_LOAD_FILES_'))
-{
+if (!defined('_PS_VERSION_'))
 	exit;
-}
 
 class Payeer extends PaymentModule 
 {
@@ -12,6 +10,7 @@ class Payeer extends PaymentModule
         $this->name = 'payeer';
         $this->tab = 'payments_gateways';
 		$this->version = '0.1';
+		$this->author = 'Payeer';
 		$this->currencies = false;
 		$this->displayName = $this->l('Payeer');
 		$this->description = $this->l('Payment via Payeer');
@@ -44,7 +43,7 @@ class Payeer extends PaymentModule
 					<input type="text" name="merchant_url" value="' . $m_url . '" style="width: 300px;"  />
 				</div>
 				<div style="clear: both;"></div>
-				<label>' . $this->l('Merchant ID:') . '</label>
+				<label>' . $this->l('The ID of the store:') . '</label>
 				<div class="margin-form">
 					<input type="text" name="merchant_id" value="' . Configuration::get('merchant_id') . '" style="width: 300px;"  />
 				</div>
@@ -54,7 +53,7 @@ class Payeer extends PaymentModule
 					<input type="text" name="secret_key" value="' . Configuration::get('secret_key') . '" style="width: 300px;" />
 				</div>
 				<div style="clear: both;"></div>
-				<label>' . $this->l('IP - filter:') . '</label>
+				<label>' . $this->l('IP filter:') . '</label>
 				<div class="margin-form">
 					<input type="text" name="ip_filter" value="' . Configuration::get('ip_filter') . '" style="width: 300px;" />
 				</div>

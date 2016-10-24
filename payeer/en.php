@@ -1,0 +1,38 @@
+<?php
+
+global $_MODULE;
+$_MODULE = array();
+$_MODULE['<{payeer}prestashop>payeer_e258fdafe003e9602f1bbff7de431b01'] = 'Payeer';
+$_MODULE['<{payeer}prestashop>payeer_47e0d49db6d704469b44c38a9fe5d8a0'] = 'Payment via Payeer';
+$_MODULE['<{payeer}prestashop>payeer_f4f70727dc34561dfde1a3c529b6205c'] = 'Settings';
+$_MODULE['<{payeer}prestashop>payeer_06b139ec4a1c445f1d872c37d8ec1228'] = 'URL merchant (specify https://payeer.com/merchant/):';
+$_MODULE['<{payeer}prestashop>payeer_c5fe19d72761572b37f972b03a17f223'] = 'The ID of the store:';
+$_MODULE['<{payeer}prestashop>payeer_c743df2de9ad341534829efc5b2bc46c'] = 'Secret key:';
+$_MODULE['<{payeer}prestashop>payeer_66e0a657f60c6a8b6d8e7b8e99a16545'] = 'IP filter:';
+$_MODULE['<{payeer}prestashop>payeer_c0907bc61ba6103dfc5da705d93a7d12'] = 'Email for errors:';
+$_MODULE['<{payeer}prestashop>payeer_f6097fd0f247c934fe481fb9cccd8646'] = 'The log path orders (for example, /payeer_orders.log):';
+$_MODULE['<{payeer}prestashop>payeer_06933067aafd48425d67bcb01bba5cb6'] = 'Update';
+$_MODULE['<{payeer}prestashop>payeer_444bcb3a3fcf8389296c49467f27e1d6'] = 'ok';
+$_MODULE['<{payeer}prestashop>payeer_c888438d14855d7d96a2724ee9c306bd'] = 'Settings updated';
+$_MODULE['<{payeer}prestashop>validation_5fdc8b479ba8351209d793a3df5d6bb4'] = 'Payment of order';
+$_MODULE['<{payeer}prestashop>validation_47e0d49db6d704469b44c38a9fe5d8a0'] = 'Payment via Payeer';
+$_MODULE['<{payeer}prestashop>validation_9819ed84f1bb191ffec67cfb1bdcf582'] = 'You have chosen a payment system Payeer';
+$_MODULE['<{payeer}prestashop>validation_77d3280d611b38b21bf288b5940743a9'] = 'Please confirm the order by clicking "Confirm order"';
+$_MODULE['<{payeer}prestashop>validation_7395559a94fa7a25907a155cda78afa0'] = 'Confirm order';
+$_MODULE['<{payeer}prestashop>payment_62e740bd8d0d984cc63479692a9a83a6'] = 'Payment Payeer';
+$_MODULE['<{payeer}prestashop>payment-none_62e740bd8d0d984cc63479692a9a83a6'] = 'Payment Payeer';
+$_MODULE['<{payeer}prestashop>status_c4482d21bb07fcaa954b5f4737966a58'] = ' - the ip address of the server is not trusted';
+$_MODULE['<{payeer}prestashop>status_9ffffb5598fc15307c01553225d90b31'] = '   trusted ip: ';
+$_MODULE['<{payeer}prestashop>status_9a08c9dcbdb5c4ec0fd7ccd589afec26'] = '   the ip of the current server: ';
+$_MODULE['<{payeer}prestashop>status_7fed70b9158e58d4313fd517be45e073'] = ' - do not match the digital signature';
+$_MODULE['<{payeer}prestashop>status_706d7e95bfbc98301754d504b8b5540a'] = ' - wrong amount';
+$_MODULE['<{payeer}prestashop>status_10eedf159e4082ccb1eeeeaefc86042c'] = ' - wrong currency';
+$_MODULE['<{payeer}prestashop>status_9ba9f5bc9b34db88fc8975b87680e460'] = ' - the payment status is not success';
+$_MODULE['<{payeer}prestashop>status_76b1716256cb435898f22b07b71c19cd'] = 'Failed to make the payment through Payeer for the following reasons:';
+$_MODULE['<{payeer}prestashop>status_5c2debf906f1c267b9311e62bf0ecba4'] = 'Error payment';
+$_MODULE['<{payeer}prestashop>success_5fdc8b479ba8351209d793a3df5d6bb4'] = 'Payment of order';
+$_MODULE['<{payeer}prestashop>success_802024b279b2158800d75b4725bc77ba'] = 'successful';
+$_MODULE['<{payeer}prestashop>success_e0aa021e21dddbd6d8cecec71e9cf564'] = 'OK';
+$_MODULE['<{payeer}prestashop>fail_5fdc8b479ba8351209d793a3df5d6bb4'] = 'Payment of order';
+$_MODULE['<{payeer}prestashop>fail_26934eb377001f66e37289a5c93fe284'] = 'failed';
+$_MODULE['<{payeer}prestashop>fail_e0aa021e21dddbd6d8cecec71e9cf564'] = 'OK';

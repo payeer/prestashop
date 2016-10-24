@@ -4,10 +4,11 @@ require_once(dirname(__FILE__) . '/payeer.php');
 
 if (isset($_POST["m_operation_id"]) && isset($_POST["m_sign"]))
 {
+	$payeer = new Payeer();
 	$err = false;
 	$message = '';
 	
-	// logging
+	// запись логов
 
 	$log_text = 
 		"--------------------------------------------------------\n" .
@@ -30,7 +31,7 @@ if (isset($_POST["m_operation_id"]) && isset($_POST["m_sign"]))
 		file_put_contents($_SERVER['DOCUMENT_ROOT'] . $log_file, $log_text, FILE_APPEND);
 	}
 
-	// digital signature verification and ip
+	// проверка цифровой подписи и ip
 
 	$sign_hash = strtoupper(hash('sha256', implode(":", array(
 		$_POST['m_operation_id'],
@@ -63,38 +64,38 @@ if (isset($_POST["m_operation_id"]) && isset($_POST["m_sign"]))
 	
 	if (!$valid_ip)
 	{
-		$message .= " - the ip address of the server is not trusted\n" .
-		"   trusted ip: " . $sIP . "\n" .
-		"   the ip of the current server: " . $_SERVER['REMOTE_ADDR'] . "\n";
+		$message .= $payeer->l(' - the ip address of the server is not trusted', 'status') . "\n" .
+		$payeer->l('   trusted ip: ', 'status') . $sIP . "\n" .
+		$payeer->l('   the ip of the current server: ', 'status') . $_SERVER['REMOTE_ADDR'] . "\n";
 		$err = true;
 	}
 
 	if ($_POST['m_sign'] != $sign_hash)
 	{
-		$message .= " - do not match the digital signature\n";
+		$message .= $payeer->l(' - do not match the digital signature', 'status') . "\n";
 		$err = true;
 	}
 
 	if (!$err)
 	{
-		// loading order
+		// загрузка заказа
 		
 		$cart = new Cart(intval($_POST['m_orderid']));
 		$order_curr = new Currency(intval($cart->id_currency));
 		$order_curr = $order_curr->iso_code == 'RUR' ? 'RUB' : $order_curr->iso_code;
 		$order_amount = number_format($cart->getOrderTotal(true, Cart::BOTH), 2, '.', '');
 		
-		// check the amount and currency
+		// проверка суммы и валюты
 	
 		if ($_POST['m_amount'] != $order_amount)
 		{
-			$message .= " - wrong amount\n";
+			$message .= $payeer->l(' - wrong amount', 'status') . "\n";
 			$err = true;
 		}
 
 		if ($_POST['m_curr'] != $order_curr)
 		{
-			$message .= " - wrong currency\n";
+			$message .= $payeer->l(' - wrong currency', 'status') . "\n";
 			$err = true;
 		}
 		
@@ -102,8 +103,6 @@ if (isset($_POST["m_operation_id"]) && isset($_POST["m_sign"]))
 		
 		if (!$err)
 		{
-			$payeer = new Payeer();
-			
 			switch ($_POST['m_status'])
 			{
 				case 'success':
@@ -111,7 +110,7 @@ if (isset($_POST["m_operation_id"]) && isset($_POST["m_sign"]))
 					break;
 					
 				default:
-					$message .= " - the payment status is not success\n";
+					$message .= $payeer->l(' - the payment status is not success', 'status') . "\n";
 					$payeer->validateOrder((int)($_POST['m_orderid']), 8, (float)($_POST['m_amount']), $payeer->displayName, NULL, array(), NULL, false, false);
 					$err = true;
 					break;
@@ -125,10 +124,10 @@ if (isset($_POST["m_operation_id"]) && isset($_POST["m_sign"]))
 
 		if (!empty($to))
 		{
-			$message = "Failed to make the payment through Payeer for the following reasons:\n\n" . $message . "\n" . $log_text;
+			$message = $payeer->l('Failed to make the payment through Payeer for the following reasons:', 'status') . "\n\n" . $message . "\n" . $log_text;
 			$headers = "From: no-reply@" . $_SERVER['HTTP_HOST'] . "\r\n" . 
 			"Content-type: text/plain; charset=utf-8 \r\n";
-			mail($to, 'Error payment', $message, $headers);
+			mail($to, $payeer->l('Error payment', 'status'), $message, $headers);
 		}
 		
 		exit($_POST['m_orderid'] . '|error');
