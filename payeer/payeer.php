@@ -1,157 +1,219 @@
 <?php
 
-if (!defined('_CAN_LOAD_FILES_'))
-{
-	exit;
+if (!defined('_PS_VERSION_')) {
+    exit;
 }
 
-class Payeer extends PaymentModule 
+class Payeer extends PaymentModule
 {
-    public function __construct() 
-	{
+    public function __construct()
+    {
         $this->name = 'payeer';
-        $this->tab = 'payments_gateways';
-		$this->version = '0.1';
-		$this->currencies = false;
-		$this->displayName = $this->l('Payeer');
-		$this->description = $this->l('Оплата через Payeer');
-		parent::__construct();
-	}
+        $this->author = 'Payeer';
+        $this->version = '1.0.2';
+        $this->need_instance = 1;
+		$this->bootstrap = true;
 
-	public function install()
+        $this->ps_versions_compliancy = array('min' => '1.6.0.0', 'max' => _PS_VERSION_);
+        $this->controllers = array('status', 'success', 'fail', 'payment');
+        $this->is_eu_compatible = 1;
+        $this->currencies = true;
+
+        parent::__construct();
+
+		$this->displayName = $this->l('Payeer');
+		$this->description = $this->l('Payment via Payeer');
+
+        $updateConfig = array('PS_OS_CHEQUE', 'PS_OS_PAYMENT', 'PS_OS_PREPARATION', 'PS_OS_SHIPPING', 'PS_OS_CANCELED', 'PS_OS_REFUND', 'PS_OS_ERROR', 'PS_OS_OUTOFSTOCK', 'PS_OS_BANKWIRE', 'PS_OS_PAYPAL', 'PS_OS_WS_PAYMENT');
+        if (!Configuration::get('PS_OS_PAYMENT')) {
+            foreach ($updateConfig as $u) {
+                if (!Configuration::get($u) && defined('_'.$u.'_')) {
+                    Configuration::updateValue($u, constant('_'.$u.'_'));
+                }
+            }
+        }
+    }
+
+    public function install()
 	{
-		if (!parent::install() 
-			OR !$this->registerHook('payment') 
-			OR !$this->registerHook('paymentReturn') 
-			OR !$this->registerHook('updateOrderStatus'))
-		{
+		if (!parent::install() || !$this->registerHook('payment'))
 			return false;
-		}
-		
 		return true;
 	}
-
-	private function _displayForm()
-	{
-		$m_url = (Configuration::get('merchant_url') == '' ? 'https://payeer.com/merchant/' : Configuration::get('merchant_url'));
-		
-		$this->_html .= '
-		<form method="post" action="' . $_SERVER['REQUEST_URI'] . '">
-			<fieldset >
-				<legend><img src="' . __PS_BASE_URI__ . 'modules/payeer/logo.png" alt="" />' . $this->l('Настройки') . '</legend>
-				<label>' . $this->l('URL мерчанта (укажите https://payeer.com/merchant/):') . '</label>
-				<div class="margin-form">
-					<input type="text" name="merchant_url" value="' . $m_url . '" style="width: 300px;"  />
-				</div>
-				<div style="clear: both;"></div>
-				<label>' . $this->l('Идентификатор магазина:') . '</label>
-				<div class="margin-form">
-					<input type="text" name="merchant_id" value="' . Configuration::get('merchant_id') . '" style="width: 300px;"  />
-				</div>
-				<div style="clear: both;"></div>
-				<label>' . $this->l('Секретный ключ:') . '</label>
-				<div class="margin-form">
-					<input type="text" name="secret_key" value="' . Configuration::get('secret_key') . '" style="width: 300px;" />
-				</div>
-				<div style="clear: both;"></div>
-				<label>' . $this->l('IP - фильтр:') . '</label>
-				<div class="margin-form">
-					<input type="text" name="ip_filter" value="' . Configuration::get('ip_filter') . '" style="width: 300px;" />
-				</div>
-				<div style="clear: both;"></div>
-				<label>' . $this->l('Email для ошибок:') . '</label>
-				<div class="margin-form">
-					<input type="text" name="email_error" value="' . Configuration::get('email_error') . '" style="width: 300px;" />
-				</div>
-				<label>' . $this->l('Путь к журналу заказов (например, /payeer_orders.log):') . '</label>
-				<div class="margin-form">
-					<input type="text" name="payeer_log" value="' . Configuration::get('payeer_log') . '" style="width: 300px;" />
-				</div>
-				<center><input type="submit" class="button" name="btnSubmit" value="' . $this->l('Обновить') .'" style="margin-top: 25px;" /></center>
-			</fieldset>
-		</form>';
-	}
-
-	private function _postProcess()
-	{
-		if (isset($_POST['btnSubmit']))
-		{
-			if ($merchant_url = Tools::GetValue('merchant_url'))
-			{
-				if (empty($merchant_url))
-				{
-					Configuration::updateValue('merchant_url', 'https://payeer.com/merchant/');
-				}
-				else
-				{
-					Configuration::updateValue('merchant_url', $merchant_url);
-				}
-			}
-			
-			if ($merchant_id = Tools::GetValue('merchant_id'))
-			{
-				Configuration::updateValue('merchant_id', $merchant_id);
-			}
-			
-			if ($secret_key = Tools::GetValue('secret_key'))
-			{
-				Configuration::updateValue('secret_key', $secret_key);
-			}
-			
-			if ($ip_filter = Tools::GetValue('ip_filter'))
-			{
-				Configuration::updateValue('ip_filter', $ip_filter);
-			}
-			
-			if ($email_error = Tools::GetValue('email_error'))
-			{
-				Configuration::updateValue('email_error', $email_error);
-			}
-			
-			if ($payeer_log = Tools::GetValue('payeer_log'))
-			{
-				Configuration::updateValue('payeer_log', $payeer_log);
-			}
-			
-			$this->_html .= '<div class="conf confirm"><img src="../img/admin/ok.gif" alt="' . $this->l('ok') . '" /> ' . $this->l('Настройки обновлены') . '</div>';
-		}
-	}
-
+	
+	public function uninstall()
+    {
+        return parent::uninstall() && Configuration::deleteByName('payeer');
+    }
+	
 	public function getContent()
 	{
-		$this->_html = '<h2>' . $this->displayName . '</h2>';
-
-		if (!empty($_POST))
+		if (Tools::isSubmit('submitpayeer'))
 		{
-			$this->_postProcess();
+			$this->postProcess();
 		}
-		else
-			$this->_html .= '<br />';
-
-		$this->_displayForm();
-
-		return $this->_html;
+		
+		$this->html .= $this->renderForm();
+		
+		return $this->html;
 	}
 	
+	private function postProcess()
+	{
+		Configuration::updateValue('merchant_url', Tools::getValue('merchant_url'));
+		Configuration::updateValue('merchant_id', Tools::getValue('merchant_id'));
+		Configuration::updateValue('secret_key', Tools::getValue('secret_key'));
+		Configuration::updateValue('ip_filter', Tools::getValue('ip_filter'));
+		Configuration::updateValue('payeer_log', Tools::getValue('payeer_log'));
+		Configuration::updateValue('email_error', Tools::getValue('email_error'));
+		
+		$this->html .= $this->displayConfirmation($this->l('Settings updated.'));
+	}
+
+	public function renderForm()
+	{
+		$this->fields_form[0]['form'] = array(
+				'legend' => array(
+				'title' => $this->l('Settings'),
+				'image' => _PS_ADMIN_IMG_.'information.png'
+			),
+			'input' => array(
+				array(
+					'type' => 'text',
+					'label' => $this->l('Merchant URL'),
+					'desc' => $this->l('URL for the payment'),
+					'name' => 'merchant_url'
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('ID store'),
+					'desc' => $this->l('Store identifier registered in Payeer'),
+					'name' => 'merchant_id'
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Secret key'),
+					'desc' => $this->l('Secret key of merchant'),
+					'name' => 'secret_key'
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('IP - filter'),
+					'desc' => $this->l('List of trusted IP addresses, you can specify the mask'),
+					'name' => 'ip_filter'
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Path to the log file'),
+					'desc' => $this->l('Path to the log file for payments via Payeer (for example, /payeer_orders.log)'),
+					'name' => 'payeer_log'
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Email for errors'),
+					'desc' => $this->l('Email to send payment errors'),
+					'name' => 'email_error'
+				)
+			),
+			'submit' => array(
+				'name' => 'submitpayeer',
+				'title' => $this->l('Save')
+			)
+		);
+		$this->fields_form[1]['form'] = array(
+			'legend' => array(
+				'title' => $this->l('Merchant configuration information') ,
+				'image' => _PS_ADMIN_IMG_.'information.png'
+			),
+			'input' => array(
+				array(
+					'type' => 'text',
+					'label' => $this->l('Success URL'),
+					'desc' => $this->l('URL to be used for query in case of successful payment.'),
+					'name' => 'success_url',
+					'size' => 120
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Fail URL'),
+					'desc' => $this->l('URL to be used for query in case of failed payment.'),
+					'name' => 'fail_url',
+					'size' => 120
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Status URL'),
+					'desc' => $this->l('Used for payment notification.'),
+					'name' => 'status_url',
+					'size' => 120
+				)
+			)
+		);
+
+		$helper = new HelperForm();
+		$helper->module = $this;
+		$helper->show_toolbar = false;
+		$helper->table = $this->table;
+		$lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
+		$helper->default_form_language = $lang->id;
+		$helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') : 0;
+		$helper->identifier = $this->identifier;
+		$helper->submit_action = 'submitpayeer';
+		$helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).'&configure='.$this->name.
+			'&tab_module='.$this->tab.'&module_name='.$this->name;
+		$helper->token = Tools::getAdminTokenLite('AdminModules');
+		$helper->tpl_vars = array(
+			'fields_value' => $this->getConfigFieldsValues(),
+			'languages' => $this->context->controller->getLanguages(),
+			'id_language' => $this->context->language->id
+		);
+		return $helper->generateForm($this->fields_form);
+	}
+	
+	public function getConfigFieldsValues()
+	{
+		$fields_values = array();
+
+		$fields_values['merchant_url'] = Configuration::get('merchant_url') == '' ? 'https://payeer.com/merchant/' : Configuration::get('merchant_url');
+		$fields_values['merchant_id'] = Configuration::get('merchant_id');
+		$fields_values['secret_key'] = Configuration::get('secret_key');
+		$fields_values['ip_filter'] = Configuration::get('ip_filter');
+		$fields_values['payeer_log'] = Configuration::get('payeer_log');
+		$fields_values['email_error'] = Configuration::get('email_error');
+
+		$fields_values['status_url'] = $this->context->link->getModuleLink('payeer', 'status', array(), true);
+		$fields_values['success_url'] = $this->context->link->getModuleLink('payeer', 'success', array(), true);
+		$fields_values['fail_url'] = $this->context->link->getModuleLink('payeer', 'fail', array(), true);
+
+		return $fields_values;
+	}
+
+    public function hasProductDownload($cart)
+    {
+        $products = $cart->getProducts();
+
+        if (!empty($products)) {
+            foreach ($products as $product) {
+                $pd = ProductDownload::getIdFromIdProduct((int)($product['id_product']));
+                if ($pd and Validate::isUnsignedInt($pd)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 	public function hookPayment($params)
 	{
 		if (!$this->active)
-		{
 			return;
-		}
-		
-		global $smarty;
 
-		$smarty->assign(array(
+		$this->smarty->assign(array(
 			'this_path' => $this->_path,
-			'this_path_ssl' => Tools::getHttpHost(true, true) . __PS_BASE_URI__ . 'modules/' . $this->name . '/'
+			'this_path_cheque' => $this->_path,
+			'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->name.'/'
 		));
-
-		return $this->display(__FILE__, 'payment.tpl');
+		return $this->display(__FILE__, 'payeer_intro.tpl');
 	}
-
-	public function hookUpdateOrderStatus($params)
-	{
-	    return true;
-    }
 }
